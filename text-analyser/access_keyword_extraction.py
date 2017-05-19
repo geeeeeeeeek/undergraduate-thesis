@@ -25,6 +25,7 @@ def get_precision(algorithm_selections):
             counter += 1
     return counter /20
 
+all_algorithms = {'tf_idf_selections': 0, 'tf_idf_pos_selections': 0, 'tf_idf_all_selections': 0, 'textrank_selections': 0}
 for key, value in human_selections.iteritems():
     print '###' + key + '###'
     tf_idf_path = 'assets/shanghai_parks_poi_reviews_tf_idf/tf_idf/{k}'.format(k=key)
@@ -34,8 +35,10 @@ for key, value in human_selections.iteritems():
             line = fp.readline().strip()
             tf_idf_selections.append(line.split()[0])
     
+    precision = get_precision(tf_idf_selections)
     print 'TF-IDF Precision: ',
-    print get_precision(tf_idf_selections)
+    print precision
+    all_algorithms['tf_idf_selections'] += precision
 
 
     tf_idf_pos_path = 'assets/shanghai_parks_poi_reviews_pseg/tf_idf/{k}'.format(k=key)
@@ -44,22 +47,33 @@ for key, value in human_selections.iteritems():
         for i in xrange(10):
             line = fp.readline().strip()
             tf_idf_pos_selections.append(line.split()[0])
-    
+
+    precision = get_precision(tf_idf_pos_selections)
     print 'TF-IDF (With Pos) Precision: ',
-    print get_precision(tf_idf_pos_selections)
+    print precision
+    all_algorithms['tf_idf_pos_selections'] += precision
 
 
     tf_idf_all_path = 'assets/shanghai_parks_poi_reviews_extract_keywords/segments/{k}'.format(k=key)
     with open(tf_idf_all_path, 'r') as fp:
         tf_idf_all_selections = fp.readline().split()
     
+    precision = get_precision(tf_idf_all_selections)
     print 'TF-IDF (All Documents) Precision: ',
-    print get_precision(tf_idf_all_selections)
-
+    print precision
+    all_algorithms['tf_idf_all_selections'] += precision
 
     textrank_path = 'assets/shanghai_parks_poi_reviews_text_rank/segments/{k}'.format(k=key)
     with open(textrank_path, 'r') as fp:
         textrank_selections = fp.readline().split()
     
+    precision = get_precision(textrank_selections)
     print 'Text Rank Precision: ',
-    print get_precision(textrank_selections)
+    print precision
+    all_algorithms['textrank_selections'] += precision
+
+print '###Mean###'
+for key, value in all_algorithms.iteritems():
+    print key,
+    print ': ',
+    print value / 4
