@@ -2,10 +2,12 @@
 from __future__ import division
 
 import logging
-import jieba
+import jieba.posseg as pseg
 import os
 import collections
 import math
+from pymongo import MongoClient
+import jieba
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +21,18 @@ class KeywordExtractor:
         self.read_stop_words()
 
         dir_path = {
-            'input': '../poi-crawler/assets/{n}'.format(n=self.name),
             'output': 'assets/{n}'.format(n=self.name),
             'seg_output': 'assets/{n}/segments'.format(n=self.name),
             'tf_output': 'assets/{n}/term_frequency'.format(n=self.name),
             'tf_idf_output': 'assets/{n}/tf_idf'.format(n=self.name)
         }
+
+        client = MongoClient('localhost', 27017)
+        db = client['poi']
+        shanghai_parks_info = db['shanghai_parks_info']
+        shanghai_parks_reviews = db['shanghai_parks_reviews']
+        
+        id_list = [info['id'] for info in shanghai_parks_info.find({}, {'id': 1})]
 
         if not os.path.exists(dir_path['output']):
             os.mkdir(dir_path['output'])
@@ -35,20 +43,19 @@ class KeywordExtractor:
 
         # Iterate over reviews fetched previously
         document_number = 0
-        for filename in os.listdir(dir_path['input']):
-            number = filename.split('.')[0]
+        for number in id_list:
             # Read review body
-            with open(os.path.join(dir_path['input'], filename), 'r') as fp:
-                review_body = fp.read()
+            review_list = shanghai_parks_reviews.find({'id': number})[0]['reviewList']
+            review_body = "\n".join([review['reviewBody'] for review in review_list])
 
             # Split document into segments
             seg_list = self.split_words(review_body)
-            with open(os.path.join(dir_path['seg_output'], filename), 'w+') as fp:
+            with open(os.path.join(dir_path['seg_output'], str(number)), 'w+') as fp:
                 fp.write(' '.join(seg_list).encode('utf-8'))
 
             # Count term frequency
             self.tf_dict[number] = self.count_term_frequency(seg_list)
-            with open(os.path.join(dir_path['tf_output'], filename), 'w+') as fp:
+            with open(os.path.join(dir_path['tf_output'], str(number)), 'w+') as fp:
                 fp.write('\n'.join([key + ' ' + str(value) for key, value in self.tf_dict[number].most_common(100)]).encode('utf-8'))
 
             # Count inverse document frequency
@@ -60,11 +67,10 @@ class KeywordExtractor:
             fp.write('\n'.join([key + ' ' + str(value) for key, value in self.idf_meta.most_common(1000)]).encode('utf-8'))
         
         # Calculate tf-idf
-        for filename in os.listdir(dir_path['input']):
-            number = filename.split('.')[0]
+        for number in id_list:
             tf_idf_list = self.calculate_tf_idf(number, document_number)
 
-            with open(os.path.join(dir_path['tf_idf_output'], filename), 'w+') as fp:
+            with open(os.path.join(dir_path['tf_idf_output'], str(number)), 'w+') as fp:
                 fp.write('\n'.join([key + ' ' + str(value) for key, value in tf_idf_list]).encode('utf-8'))
 
     def read_stop_words(self):
@@ -75,13 +81,9 @@ class KeywordExtractor:
 
     def split_words(self, review_body):
         # Cut the entire review body and remove stop words
-        seg_list = jieba.cut(review_body)
-        return [
-            x for x in seg_list if x.strip() not in self.stop_words 
-            and len(x) > 1 
-            and x[0] != '一'.decode('utf-8')
-            and x[0] != '哈'.decode('utf-8')
-            and not x[-1].isdigit()]
+        allowPOS = ['n', 'vn', 'a', 'j']
+        words = pseg.cut(review_body)
+        return [word for word, flag in words if len(word) > 1 and flag in allowPOS]
 
     def count_term_frequency(self, seg_list):
         return collections.Counter(seg_list)
@@ -97,7 +99,7 @@ class KeywordExtractor:
         tf_idf_list = []
         for word in tf_counter:
             tf = tf_counter[word] / most_common_total
-            idf = math.log(document_number / (self.idf_meta[word] + 1))
+            idf = math.log(document_number / (self.idf_meta[word] + 1), 1.2)
             tf_idf = tf * idf
             tf_idf_list.append((word, tf_idf))
         return sorted(tf_idf_list, key=lambda x: x[1], reverse=True)

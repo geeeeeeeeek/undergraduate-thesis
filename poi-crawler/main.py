@@ -4,6 +4,8 @@ import json
 
 from poi_list import POIListCrawler
 from poi_reviews import POIReviewsCrawler
+from poi_location import POILocationCrawler
+from poi_reviews_full import POIFullReviewsCrawler
 
 # Setup logging options
 logging.basicConfig(
@@ -41,3 +43,19 @@ for section in config.sections():
             'output_name': section
         }
         POIReviewsCrawler(items).do()
+    
+    elif handler == 'poi_reviews_full':
+        items = {
+            'output_name': section
+        }
+        POIFullReviewsCrawler(items).do()
+    
+    elif handler == 'poi_location':
+        list_name = config.get(section, 'list')
+        with open('assets/{n}.txt'.format(n=list_name)) as fp:
+            poi_list = fp.read()
+        items = {
+            'list': json.loads(poi_list),
+            'list_name': list_name
+        }
+        POILocationCrawler(items).do()
