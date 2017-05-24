@@ -50,10 +50,11 @@ class VisitorGroupPreferenceExtractor:
                 continue
             
             rate_list.append(math.log(workday_review_count / 5 / holiday_review_count * 2))
-            self.write_to_mongo(number, workday_review_count, holiday_review_count)
+            # self.write_to_mongo(number, workday_review_count, holiday_review_count)
 
-        # pp.plot(rate_list, [0] * len(rate_list), 'x')
-        # pp.show()
+        pp.plot(rate_list, [0] * len(rate_list), 'x')
+        pp.xlabel("Visitor Group Preference")
+        pp.show()
 
     def is_workday(self, y, m, d):
         date = datetime.datetime(y, m, d)

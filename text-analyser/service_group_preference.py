@@ -53,10 +53,11 @@ class ServiceGroupPreferenceExtractor:
                 continue
             
             rate_list.append(math.log(workhour_count / offworkhour_count))
-            self.write_to_mongo(number, workhour_count, offworkhour_count)
+            # self.write_to_mongo(number, workhour_count, offworkhour_count)
 
-        # pp.plot(rate_list, [0] * len(rate_list), 'x')
-        # pp.show()
+        pp.plot(rate_list, [0] * len(rate_list), 'x')
+        pp.xlabel("Service Group Preference")
+        pp.show()
 
     def is_workday(self, y, m, d, h):
         date = datetime.datetime(y, m, d)

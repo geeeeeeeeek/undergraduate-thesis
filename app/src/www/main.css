@@ -1,8 +1,21 @@
 html {
   font-family: 'Roboto', sans-serif;
+  width: 100%;
+  overflow: hidden;
 }
 
 body {
   font-size: 13px;
   line-height: 20px;
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+::-webkit-scrollbar { 
+    display: none; 
 }
