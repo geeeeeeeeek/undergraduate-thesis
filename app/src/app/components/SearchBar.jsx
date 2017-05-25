@@ -8,7 +8,7 @@ import {grey500, grey900} from 'material-ui/styles/colors';
 
 const style = {
   Paper: {
-    padding: '30px 20px 10px',
+    padding: '10px 20px',
     display: 'flex',
     alignItems: 'center',
     flexShrink: 0,

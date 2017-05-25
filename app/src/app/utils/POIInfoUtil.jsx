@@ -3,7 +3,7 @@ import $ from 'jquery';
 const parkPlaceholderImage = 'http://images.clipartpanda.com/city-clipart-City-Park.png';
 export default class POIInfoutil{
     constructor() {
-        this.urlBase = 'http://localhost:23333/info';
+        this.urlBase = 'http://172.27.33.117:23333/info';
     }
 
     get(id) {

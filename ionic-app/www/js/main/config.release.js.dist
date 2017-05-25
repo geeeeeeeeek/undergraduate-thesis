@@ -1,0 +1,4 @@
+angular.module('starter')
+  .constant('config', {
+    apiServer: 'http://live.server.com/'
+  });
