@@ -43,7 +43,11 @@ class AppServer {
   }
 
   getSearchResults(req, res, next) {
-
+    const key = req.params.key;
+    this.infoUtil.search(key).then((result) => {
+      res.send(result);
+      next();
+    });
   }
 
   getReviewsById(req, res, next) {

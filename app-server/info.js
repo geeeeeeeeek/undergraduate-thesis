@@ -28,6 +28,22 @@ class InfoUtil{
         })
     }
 
+    search(keyword) {
+        if (keyword == "~"){
+            return this.getNearbyList();
+        }
+        return new Promise((res, rej) => {
+            this.collection.find({}).toArray((err, docs) => {
+                if (err) {
+                    rej(err);
+                } else {
+                    const filtered_docs = docs.filter((doc)=>{return doc.name.indexOf(keyword) >= 0;})
+                    res(filtered_docs);
+                }
+            });
+        })
+    }
+
     getLocationsList() {
         return new Promise((res, rej) => {
             this.collection.find({}).toArray((err, docs) => {

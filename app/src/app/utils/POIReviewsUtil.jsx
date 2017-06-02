@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 export default class POIReviewsUtil{
     constructor() {
-        this.urlBase = 'http://172.27.33.117:23333/reviews';
+        this.urlBase = 'http://localhost:23333/reviews';
     }
 
     get(id) {

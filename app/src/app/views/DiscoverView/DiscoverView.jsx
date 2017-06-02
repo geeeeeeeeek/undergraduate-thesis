@@ -60,8 +60,11 @@ export default class DiscoverView extends Component {
     }
 
     handleSearch(searchText) {
+        if (!searchText) {
+            searchText = "~";
+        }
         this.setState({searching: true});
-        this.poiInfoUtil.listNearest().then((items) => {
+        this.poiInfoUtil.search(searchText).then((items) => {
             this.setState({
                 searching: false,
                 items: items
